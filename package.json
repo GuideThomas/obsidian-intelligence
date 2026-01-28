@@ -1,0 +1,49 @@
+{
+  "name": "obsidian-intelligence",
+  "version": "1.0.0",
+  "description": "Structural analysis, engagement tracking, and AI-generated catalyst questions for Obsidian vaults",
+  "main": "vault-intelligence.js",
+  "bin": {
+    "vault-intelligence": "./vault-intelligence.js"
+  },
+  "scripts": {
+    "start": "node vault-intelligence.js",
+    "index": "node vault-intelligence.js index",
+    "status": "node vault-intelligence.js status",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "report": "node vault-intelligence.js report"
+  },
+  "keywords": [
+    "obsidian",
+    "vault",
+    "mcp",
+    "knowledge-management"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GuideThomas/obsidian-intelligence.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GuideThomas/obsidian-intelligence/issues"
+  },
+  "homepage": "https://github.com/GuideThomas/obsidian-intelligence#readme",
+  "dependencies": {
+    "better-sqlite3": "^11.7.0",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "dotenv": "^16.3.1"
+  },
+  "optionalDependencies": {
+    "chokidar": "^4.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Thomas Winkler",
+  "license": "MIT"
+}

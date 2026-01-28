@@ -1,0 +1,12 @@
+node_modules/
+coverage/
+.env
+.env.local
+.env.production
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+vault-report.html
+.DS_Store
+Thumbs.db
