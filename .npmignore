@@ -1,0 +1,13 @@
+test/
+coverage/
+.env
+.env.example
+.github/
+*.db
+*.db-wal
+*.db-shm
+vault-report.html
+vitest.config.js
+.gitignore
+CONTRIBUTING.md
+CHANGELOG.md
