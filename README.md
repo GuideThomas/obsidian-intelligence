@@ -1,224 +1,266 @@
 # Obsidian Intelligence
 
-Structural analysis and engagement tracking for [Obsidian](https://obsidian.md) vaults.
+> **Make your Obsidian vault a first-class knowledge source for any MCP-enabled AI assistant. Local, private, headless.**
 
-I built this because I wanted to understand my ~800 note Obsidian vault better. Which notes are orphaned? Which ones are hubs that everything links to? What did I write 6 months ago that I completely forgot about but is actually well-connected?
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](#requirements)
+[![Tests](https://img.shields.io/badge/tests-255%20passing-brightgreen)](#tests)
 
-It indexes your vault into a local SQLite database and gives you graph queries, engagement classification, and an MCP server so your AI assistant can answer questions about your vault structure.
+Your Obsidian vault is your most valuable knowledge base. But no AI assistant can read it — not without uploading your notes to some cloud service.
 
-## What it does
+**Obsidian Intelligence** turns your vault into a [Model Context Protocol](https://modelcontextprotocol.io) server. Any MCP-enabled AI client (Claude Desktop, Claude Code, Cursor, OpenWebUI, Cline, Continue.dev, ChatGPT Desktop) can then search, analyze, and reason over your vault — *without your notes ever leaving your machine*.
 
-- **Graph queries** -- orphans, hubs, backlinks, broken links, tag cloud, related notes
-- **Engagement tracking** -- classifies notes as active/moderate/dormant/archived based on when you last touched them
-- **AI catalyst questions** -- optionally uses an LLM to generate questions about dormant but well-connected notes (no note content is sent, only structural metadata)
-- **HTML reports** -- self-contained vault health report with charts
-- **MCP server** -- expose analysis tools to Claude, ChatGPT, etc. via [Model Context Protocol](https://modelcontextprotocol.io)
-- **Watch mode** -- re-indexes on file changes
-- **CouchDB support** -- for [Obsidian LiveSync](https://github.com/vrtmrz/obsidian-livesync) users
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Your AI client (Claude Desktop / Code / Cursor / OpenWebUI)│
+│                          ↕  MCP                             │
+│              obsidian-intelligence (this tool)              │
+│                          ↕                                  │
+│         your vault  +  local SQLite index                   │
+└─────────────────────────────────────────────────────────────┘
+```
 
-### What it doesn't do
+## Why this exists
 
-- It doesn't read or send your note *content* anywhere (except to the optional LLM, and even then only titles/tags/structure)
-- It doesn't modify your vault -- the SQLite DB is the only thing it writes
-- It's not a plugin -- it runs outside Obsidian as a CLI tool
+The AI tooling ecosystem just converged on a shared standard: MCP. What was an Anthropic experiment six months ago is now the de-facto interface across Claude Desktop, Claude Code, Cursor, OpenWebUI, and a growing list of clients.
 
-## Quick Start
+That means **one MCP server, configured once, works everywhere**. Set up `obsidian-intelligence` once in your favorite client's config, and from then on every chat, every coding agent, every workflow has structured access to your own knowledge base.
+
+Imagine asking Claude Code in your editor:
+> *"Which notes from my vault are relevant to what I'm building right now?"*
+> *"Did I write something about database migrations? Search semantically."*
+> *"Which dormant notes could I connect to this current project?"*
+
+Or asking Claude Desktop on a Sunday evening:
+> *"Look at the notes I touched in the last 6 days and write me a weekly review prompt."*
+
+Or building an OpenWebUI agent that opens every conversation with *"this question shows up in 4 of your older notes"*.
+
+Each of these works without writing any code — once MCP is connected, your vault is part of the context.
+
+## What you get
+
+### 13 MCP tools, ready to use
+
+| Tool | What it does |
+|---|---|
+| `vault_status` | Quick overview: note count, tags, links, indexes |
+| `vault_snapshot` | Full JSON snapshot for complex queries |
+| `find_orphans` | Notes with no connections |
+| `find_hubs` | Best-connected notes — the structural anchors |
+| `find_backlinks` | Who links to a note? |
+| `find_related` | Related notes via shared tags and links |
+| `get_tag_cloud` | Tag statistics |
+| `find_notes_by_tag` | All notes with a tag |
+| `engagement_stats` | Activity distribution + revival candidates |
+| `list_catalysts` | Open AI-generated reflection questions |
+| `search_content` | **FTS5 full-text search** with BM25 ranking, snippets |
+| `semantic_search` | **Vector similarity** — finds meaning, not just words |
+| `hybrid_search` | **RRF-fused keyword + semantic** — usually the best default |
+
+Each tool is available the moment your MCP client connects. The assistant decides which one to call.
+
+### Beyond MCP
+
+- **CLI** for cron, CI, scripts, your own pipelines
+- **Self-contained HTML report** with charts (engagement donut, tag cloud, hub ranking, health score) — one file you regenerate monthly
+- **JSON snapshot export** for downstream tooling
+- **Watch mode** for automatic re-indexing
+- **CouchDB adapter** for [Obsidian LiveSync](https://github.com/vrtmrz/obsidian-livesync) users
+- **Optional document ingestion** ([obsidian-intelligence-docs](packages/docs-ingest/), text/markdown/html — pdf/docx in v1.2)
+
+## The privacy story
+
+Other RAG products say *"upload your notes and we'll search them for you"*. We do the opposite: **your notes stay where they are. The AI assistant comes to the vault, not the other way around.**
+
+| What | Where it runs |
+|---|---|
+| Indexing | 100% local (SQLite) |
+| Full-text search (FTS5) | 100% local |
+| Graph analysis | 100% local |
+| Semantic search (embeddings) | **Your choice**: local Ollama, or Gemini free tier, or OpenAI |
+| LLM enrichment | Same choice |
+| Catalysts (reflection questions) | Same choice — sends only structural metadata, not note content |
+| MCP server | Local stdio subprocess of your AI client. No network ports, no daemon. |
+
+You can run the entire tool without an API key. With Ollama installed locally (`ollama pull nomic-embed-text` and any chat model), you get the full feature set including semantic search, fully air-gapped.
+
+**No telemetry. No phone-home. No update checks.** When you `npm install -g obsidian-intelligence`, that's the first and last connection to anything I control.
+
+## Quick start
+
+### 60 seconds: install and index
 
 ```bash
-# Install globally
+# Install
 npm install -g obsidian-intelligence
 
 # Index your vault
 vault-intelligence index --vault /path/to/your/vault
 
-# View status
+# See what's there
 vault-intelligence status
-
-# Generate an HTML report
-vault-intelligence report --open
+vault-intelligence graph orphans
+vault-intelligence search "your query"
+vault-intelligence report --open    # opens HTML report in browser
 ```
 
-Or use environment variables:
+No API key needed for any of that.
 
-```bash
-export VAULT_PATH=/path/to/your/vault
-vault-intelligence index
-```
+### 90 seconds: hook it into Claude Desktop
 
-## CLI Reference
-
-### Indexing
-
-```bash
-vault-intelligence index [--force] [--vault <path>]   # Full index
-vault-intelligence status                              # Show statistics
-vault-intelligence test                                # Test connections
-```
-
-### Graph Queries
-
-```bash
-vault-intelligence graph orphans            # Notes without links or tags
-vault-intelligence graph hubs [n]           # Top N connected notes
-vault-intelligence graph backlinks <note>   # Who links to this note?
-vault-intelligence graph links <note>       # Where does this note link?
-vault-intelligence graph tags [filter]      # Tag cloud with counts
-vault-intelligence graph tag <tag>          # All notes with this tag
-vault-intelligence graph related <note>     # Related notes
-vault-intelligence graph broken             # Broken links
-```
-
-### Engagement
-
-```bash
-vault-intelligence engagement [level]    # Filter by level (active|moderate|dormant|archived)
-vault-intelligence engagement stats      # Distribution summary
-```
-
-### AI Catalysts
-
-Requires an OpenAI-compatible LLM endpoint (see [Configuration](#configuration)).
-
-```bash
-vault-intelligence catalyst generate [n]   # Generate n questions (default: 3)
-vault-intelligence catalyst list           # Show open questions
-vault-intelligence catalyst dismiss <id>   # Dismiss a question
-```
-
-### Reports & Snapshots
-
-```bash
-vault-intelligence report [--output <file>] [--open]   # HTML report
-vault-intelligence snapshot [path]                      # JSON snapshot
-```
-
-### Watch Mode
-
-```bash
-vault-intelligence watch   # Watch for vault changes and re-index
-```
-
-### Global Options
-
-| Flag | Description |
-|------|-------------|
-| `--vault <path>` | Path to Obsidian vault (overrides `VAULT_PATH`) |
-| `--db <path>` | Database path (overrides `VAULT_INTEL_DB`) |
-| `--lang <en\|de>` | Language for AI content (default: `en`) |
-| `--force` | Force re-index all notes |
-| `--output <file>` | Output file for report |
-| `--open` | Open report in browser |
-
-## MCP Server Setup
-
-The MCP server exposes vault analysis as tools for AI assistants.
-
-### Claude Desktop
-
-Add to your `claude_desktop_config.json`:
+Add to `claude_desktop_config.json` (find it via Settings → Developer → Edit Config):
 
 ```json
 {
   "mcpServers": {
-    "obsidian-intelligence": {
+    "obsidian": {
       "command": "node",
-      "args": ["/path/to/obsidian-intelligence/mcp-server.mjs"],
+      "args": ["/usr/local/lib/node_modules/obsidian-intelligence/mcp-server.mjs"],
       "env": {
-        "VAULT_PATH": "/path/to/your/vault"
+        "VAULT_PATH": "/Users/you/Documents/MyVault"
       }
     }
   }
 }
 ```
 
-### Available MCP Tools
+Restart Claude Desktop. Now ask:
 
-| Tool | Description |
-|------|-------------|
-| `vault_status` | Quick vault overview (note count, tags, links, DB size) |
-| `vault_snapshot` | Full JSON snapshot of vault state |
-| `find_orphans` | Notes without incoming links or tags |
-| `find_hubs` | Most connected notes in the vault |
-| `find_backlinks` | Notes linking to a specific note |
-| `find_related` | Related notes by shared tags and links |
-| `get_tag_cloud` | Tag usage statistics |
-| `find_notes_by_tag` | All notes with a specific tag |
-| `engagement_stats` | Engagement level distribution |
-| `list_catalysts` | Open AI-generated catalyst questions |
+> *"What are my best-connected notes?"*
+> *"Search my vault for anything about database migrations."*
+> *"Find notes related to the one called 'Project X kickoff'."*
+
+### Other MCP clients
+
+The same MCP server config pattern works in **Claude Code**, **Cursor**, **OpenWebUI**, **Cline**, **Continue.dev**, and any other MCP-faehigen client. See [docs/MCP_SETUP.md](docs/MCP_SETUP.md) for client-specific instructions.
+
+### Adding semantic search
+
+Semantic search needs embeddings. Three setups, pick whichever fits:
+
+**Local (Ollama, free, air-gapped):**
+```bash
+# Install Ollama from https://ollama.com, then:
+ollama pull nomic-embed-text
+
+export EMBEDDINGS_PROVIDER=ollama
+vault-intelligence embed run     # generates embeddings for all notes
+vault-intelligence embed search "your query"
+```
+
+**Cloud (Gemini, free tier):**
+```bash
+export EMBEDDINGS_PROVIDER=gemini
+export GEMINI_API_KEY=your-key
+vault-intelligence embed run
+```
+
+**Cloud (OpenAI):**
+```bash
+export EMBEDDINGS_PROVIDER=openai
+export LLM_API_KEY=sk-...
+vault-intelligence embed run
+```
+
+After that, the `semantic_search` and `hybrid_search` MCP tools work in your AI client.
 
 ## Configuration
 
-Configuration is via environment variables or a `.env` file in the project directory.
+All configuration is via environment variables, optionally in a `.env` file. See [`.env.example`](.env.example) for the full list.
 
-### Required
-
-| Variable | Description |
-|----------|-------------|
-| `VAULT_PATH` | Path to your Obsidian vault |
-
-### Optional
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `VAULT_INTEL_DB` | `<vault>/.vault-intelligence.db` | SQLite database path |
-| `VAULT_SOURCE` | `filesystem` | Source type (`filesystem` or `couchdb`) |
-| `LLM_API_URL` | `https://api.openai.com/v1` | OpenAI-compatible API URL |
-| `LLM_MODEL` | `gpt-4o-mini` | Model name |
-| `LLM_API_KEY` | - | API key for LLM |
-| `VAULT_INTEL_LANG` | `en` | Language for AI content (`en` or `de`) |
-| `ENGAGEMENT_ACTIVE_DAYS` | `7` | Days threshold for "active" |
-| `ENGAGEMENT_MODERATE_DAYS` | `30` | Days threshold for "moderate" |
-| `ENGAGEMENT_DORMANT_DAYS` | `90` | Days threshold for "dormant" |
-
-### CouchDB (Obsidian LiveSync)
-
-For users with [Obsidian LiveSync](https://github.com/vrtmrz/obsidian-livesync):
-
-| Variable | Description |
-|----------|-------------|
-| `COUCHDB_HOST` | CouchDB hostname |
-| `COUCHDB_PORT` | CouchDB port (default: 5984) |
-| `COUCHDB_DATABASE` | Database name |
-| `COUCHDB_USER` | CouchDB username |
-| `COUCHDB_PASSWORD` | CouchDB password |
-
-Set `VAULT_SOURCE=couchdb` to use the CouchDB adapter.
-
-## How It Works
-
-1. **Index** - Reads all `.md` files from your vault (or CouchDB), parses frontmatter, tags, wiki-links, and headings, then stores everything in a local SQLite database.
-
-2. **Analyze** - Graph queries run against the SQLite database to find structural patterns: orphans (isolated notes), hubs (highly connected notes), broken links, tag distributions, and more.
-
-3. **Engage** - Each note is classified by engagement level based on modification timestamps. Revival candidates are dormant notes with many connections that might benefit from revisiting.
-
-4. **Catalyze** - An optional LLM generates thought-provoking questions about dormant but well-connected notes to spark new ideas.
-
-5. **Report** - Generates a self-contained HTML file with Chart.js visualizations: engagement donut chart, tag cloud, hub rankings, folder activity, and a vault health score.
-
-## Development
+### Minimal config (filesystem-only, no API keys)
 
 ```bash
-# Clone and install
-git clone https://github.com/GuideThomas/obsidian-intelligence.git
-cd obsidian-intelligence
-npm install
-
-# Run tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Index a test vault
-node vault-intelligence.js index --vault /path/to/vault
+VAULT_PATH=/path/to/your/vault
 ```
+
+That's it. Indexing, graph queries, FTS search, engagement, and HTML reports all work.
+
+### Provider matrix
+
+| Feature | Filesystem | Ollama (local) | Gemini (free) | OpenAI |
+|---|:---:|:---:|:---:|:---:|
+| Indexing | ✓ | ✓ | ✓ | ✓ |
+| Graph queries | ✓ | ✓ | ✓ | ✓ |
+| Full-text search | ✓ | ✓ | ✓ | ✓ |
+| Engagement tracking | ✓ | ✓ | ✓ | ✓ |
+| HTML reports | ✓ | ✓ | ✓ | ✓ |
+| Semantic search | — | ✓ | ✓ | ✓ |
+| Hybrid search (RRF) | partial* | ✓ | ✓ | ✓ |
+| LLM enrichment | — | ✓ | ✓ | ✓ |
+| Catalyst questions | — | ✓ | ✓ | ✓ |
+| MCP server | ✓ | ✓ | ✓ | ✓ |
+
+*Hybrid search falls back gracefully to keyword-only when no embeddings are available.
+
+## CLI reference
+
+```
+vault-intelligence index [--force] [--vault <path>]    Full index
+vault-intelligence index --rebuild-fts                 Rebuild FTS index
+vault-intelligence status                              Show statistics
+vault-intelligence test                                Test connections
+vault-intelligence report [--output <file>] [--open]   HTML report
+
+vault-intelligence search <query> [--hybrid] [--limit N] [--folder p] [--tag t]
+vault-intelligence embed run [limit] [batch_size]      Generate embeddings
+vault-intelligence embed similar <note-id>             Find similar notes
+vault-intelligence embed search <query>                Semantic search
+vault-intelligence enrich run [limit] [delay_ms]       LLM enrichment
+vault-intelligence enrich stats                        Enrichment stats
+
+vault-intelligence graph orphans                       Notes without connections
+vault-intelligence graph hubs [n]                      Top connected notes
+vault-intelligence graph backlinks <note>              Incoming links
+vault-intelligence graph related <note>                Related via tags+links
+vault-intelligence graph tags [filter]                 Tag cloud
+
+vault-intelligence engagement stats                    Activity distribution
+vault-intelligence catalyst generate [n]               Generate AI questions
+vault-intelligence proactive [summary|active|revival]  What to look at now
+vault-intelligence snapshot [path]                     JSON snapshot
+vault-intelligence watch                               Watch mode
+```
+
+Run `vault-intelligence --help` for the full list.
+
+## How it compares
+
+| | Smart Connections | RAG-as-a-Service | Custom Python script | **Obsidian Intelligence** |
+|---|---|---|---|---|
+| Lives where? | Inside Obsidian (plugin) | Cloud | Your machine | Your machine |
+| MCP-native? | No | No | No (you'd build it) | **Yes (13 tools)** |
+| Multi-client? | Obsidian only | Vendor-locked | One-off | **Any MCP client** |
+| Local-by-default? | Partial | No | Yes | **Yes** |
+| Graph + FTS + Semantic + Hybrid? | Semantic only | Varies | Build it yourself | **All four** |
+| Headless? | No | N/A | Yes | **Yes** |
+| Open source? | Yes | Mostly no | Yours | **Yes (MIT)** |
+| Telemetry? | Optional | Yes | No | **No** |
 
 ## Requirements
 
-- Node.js >= 18.0.0
-- An Obsidian vault (or CouchDB with LiveSync)
+- Node.js **>= 18**
+- An Obsidian vault (or a CouchDB database from [Obsidian LiveSync](https://github.com/vrtmrz/obsidian-livesync))
+- Optional: an LLM provider for catalysts/enrichment (Ollama, OpenAI-compatible API, or Gemini)
+- Optional: an embeddings provider for semantic search (same options)
+
+## Documentation
+
+- [docs/MCP_SETUP.md](docs/MCP_SETUP.md) — Client-specific MCP setup
+- [docs/PROVIDERS.md](docs/PROVIDERS.md) — LLM and embeddings provider matrix
+- [docs/PRIVACY.md](docs/PRIVACY.md) — What goes where, in detail
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — How it's wired internally
+- [CHANGELOG.md](CHANGELOG.md) — Release notes
+
+## Contributing
+
+Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Bug reports, feature requests, and questions all live in [GitHub Issues](https://github.com/GuideThomas/obsidian-intelligence/issues).
 
 ## License
 
 [MIT](LICENSE)
+
+---
+
+*Built by [Thomas Winkler](https://thomaswinkler.art). Originally a personal tool for a 6,000-note vault — now hopefully useful to you too.*
