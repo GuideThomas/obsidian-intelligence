@@ -222,6 +222,8 @@ Usage:
   vault-intelligence enrich run [limit] [delay_ms]     LLM metadata enrichment
   vault-intelligence enrich stats                      Enrichment statistics
 
+  vault-intelligence proactive [summary|active|revival] What to look at right now
+
   vault-intelligence graph orphans           Notes without links or tags
   vault-intelligence graph hubs [n]          Top N connected notes
   vault-intelligence graph backlinks <note>  Who links to this note?
@@ -308,6 +310,12 @@ async function main() {
       case 'enrich': {
         const { handleEnrichCommand } = require('./lib/enrichment');
         await handleEnrichCommand(subcommand, subArgs.slice(1));
+        break;
+      }
+
+      case 'proactive': {
+        const { handleProactiveCommand } = require('./lib/proactive');
+        handleProactiveCommand(subcommand);
         break;
       }
 
