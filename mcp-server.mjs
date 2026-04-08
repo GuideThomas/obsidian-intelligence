@@ -33,7 +33,7 @@ const { findOrphans, findHubs, findBacklinks, findRelated, getTagCloud, findNote
 const { classifyAll, getStats, findDormantConnected } = require('./lib/engagement.js');
 const { listCatalysts } = require('./lib/catalyst.js');
 const { buildSnapshot } = require('./lib/snapshot.js');
-const { searchContent, getFtsStats } = require('./lib/search.js');
+const { searchContent, getFtsStats, hybridSearch } = require('./lib/search.js');
 const { findSimilar, semanticSearch } = require('./lib/embeddings.js');
 const { getEmbeddingStats } = require('./lib/database.js');
 
@@ -185,6 +185,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         properties: {
           query: { type: 'string', description: 'Natural language query' },
           limit: { type: 'number', description: 'Maximum results (default: 10)', default: 10 }
+        },
+        required: ['query']
+      }
+    },
+    {
+      name: 'hybrid_search',
+      description: 'Combined keyword + semantic search using Reciprocal Rank Fusion (RRF). Merges BM25 full-text results with vector similarity results for the best overall relevance. This is usually the BEST search to use - it combines exact keyword matches with semantic understanding. Falls back gracefully to keyword-only if no embeddings are available.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Search query (natural language or keywords)' },
+          limit: { type: 'number', description: 'Maximum results (default: 15)', default: 15 },
+          folder: { type: 'string', description: 'Filter by folder path (FTS only)' },
+          tag: { type: 'string', description: 'Filter by tag name (FTS only)' }
         },
         required: ['query']
       }
@@ -395,6 +409,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             snippet: r.snippet,
             rank: r.rank
           }))
+        });
+      }
+
+      case 'hybrid_search': {
+        if (!args?.query) return errorResponse('Parameter "query" is required');
+        const result = await hybridSearch(args.query, {
+          limit: args.limit ?? 15,
+          folder: args.folder || null,
+          tag: args.tag || null
+        });
+        return successResponse({
+          query: args.query,
+          fts_count: result.fts_count,
+          semantic_count: result.semantic_count,
+          merged_count: result.merged_count,
+          semantic_used: result.semantic_used,
+          results: result.results
         });
       }
 

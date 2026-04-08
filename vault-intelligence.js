@@ -292,7 +292,7 @@ async function main() {
 
       case 'search': {
         const { handleSearchCommand } = require('./lib/search');
-        handleSearchCommand(positional);
+        await handleSearchCommand(positional);
         break;
       }
 
