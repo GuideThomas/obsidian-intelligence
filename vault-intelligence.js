@@ -22,6 +22,8 @@ function parseFlags(args) {
       flags.lang = args[++i];
     } else if (args[i] === '--force') {
       flags.force = true;
+    } else if (args[i] === '--rebuild-fts') {
+      flags.rebuildFts = true;
     } else if (args[i] === '--open') {
       flags.open = true;
     } else if (args[i] === '--db' && args[i + 1]) {
@@ -36,7 +38,27 @@ function parseFlags(args) {
 
 // --- Commands ---
 
+async function cmdRebuildFts(flags = {}) {
+  // Re-fetches all notes from the source and rebuilds notes_fts. Use after
+  // upgrading from a pre-1.1 database that has notes but no FTS rows.
+  const config = getConfig(flags);
+  const source = createSource(config);
+  const { rebuildFts } = require('./lib/database');
+
+  console.log('Fetching notes for FTS rebuild...');
+  const notes = await source.getAllNotes();
+  const contentMap = new Map();
+  for (const n of notes) contentMap.set(n.id, n.content);
+
+  console.log(`Rebuilding FTS index for ${notes.length} notes...`);
+  const result = rebuildFts((noteId) => contentMap.get(noteId) || '');
+  console.log(`FTS rebuild complete: ${result.written}/${result.total} rows written`);
+}
+
 async function cmdIndex(flags = {}) {
+  if (flags.rebuildFts) {
+    return cmdRebuildFts(flags);
+  }
   const config = getConfig(flags);
   const source = createSource(config);
   const force = flags.force || false;
@@ -62,7 +84,8 @@ async function cmdIndex(flags = {}) {
         skipped++;
       } else {
         const parsed = parseNote(note);
-        indexParsedNote(parsed, allNoteIds);
+        // Pass raw content to populate FTS5 in the same transaction.
+        indexParsedNote(parsed, allNoteIds, note.content);
         indexed++;
       }
     } catch (e) {
@@ -112,13 +135,20 @@ function cmdStatus() {
 
   const folders = getDb().prepare('SELECT COUNT(DISTINCT folder) as c FROM notes').get().c;
 
-  console.log('Vault-Intelligence Status:');
+  const { getFtsCount } = require('./lib/database');
+  const ftsCount = getFtsCount();
+  const ftsHint = ftsCount === 0 && noteCount > 0
+    ? ' (run: index --rebuild-fts)'
+    : '';
+
+  console.log('Obsidian-Intelligence Status:');
   console.log(`  Source:       ${config.source}`);
   if (config.vaultPath) console.log(`  Vault:        ${config.vaultPath}`);
   console.log(`  Notes:        ${noteCount}`);
   console.log(`  Tags:         ${tagCount}`);
   console.log(`  Links:        ${linkCount} (${brokenLinks} broken)`);
   console.log(`  Folders:      ${folders}`);
+  console.log(`  FTS indexed:  ${ftsCount}${ftsHint}`);
   console.log(`  Last index:   ${lastIndex}`);
   console.log(`  Database:     ${dbPath}`);
   console.log(`  DB size:      ${dbSize} KB`);
@@ -177,9 +207,13 @@ function showUsage() {
 
 Usage:
   vault-intelligence index [--force] [--vault <path>]  Full index
+  vault-intelligence index --rebuild-fts               Rebuild FTS search index
   vault-intelligence status                            Show statistics
   vault-intelligence test                              Test connections
   vault-intelligence report [--output <file>] [--open] Generate HTML report
+
+  vault-intelligence search <query> [--limit N] [--folder p] [--tag name]
+                                                        Full-text search (BM25)
 
   vault-intelligence graph orphans           Notes without links or tags
   vault-intelligence graph hubs [n]          Top N connected notes
@@ -249,6 +283,12 @@ async function main() {
       case 'graph': {
         const { handleGraphCommand } = require('./lib/graph');
         await handleGraphCommand(subcommand, subArgs);
+        break;
+      }
+
+      case 'search': {
+        const { handleSearchCommand } = require('./lib/search');
+        handleSearchCommand(positional);
         break;
       }
 

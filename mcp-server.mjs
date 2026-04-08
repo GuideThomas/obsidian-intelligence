@@ -33,6 +33,7 @@ const { findOrphans, findHubs, findBacklinks, findRelated, getTagCloud, findNote
 const { classifyAll, getStats, findDormantConnected } = require('./lib/engagement.js');
 const { listCatalysts } = require('./lib/catalyst.js');
 const { buildSnapshot } = require('./lib/snapshot.js');
+const { searchContent, getFtsStats } = require('./lib/search.js');
 
 // Initialize config and database
 try {
@@ -146,6 +147,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           limit: { type: 'number', description: 'Maximum results (default: 20)', default: 20 }
         },
         required: []
+      }
+    },
+    {
+      name: 'search_content',
+      description: 'Full-text search across all vault notes (BM25 ranking via SQLite FTS5). Supports phrases ("exact match"), AND/OR/NOT operators, and folder/tag filters. Returns ranked results with text snippets. Use this when looking for notes by keyword or phrase. For semantic similarity, use semantic_search or hybrid_search instead (when available).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Search query (words, "phrases", AND, OR, NOT)' },
+          limit: { type: 'number', description: 'Maximum results (default: 20)', default: 20 },
+          folder: { type: 'string', description: 'Filter by folder path (prefix match)' },
+          tag: { type: 'string', description: 'Filter by tag name (with or without #)' }
+        },
+        required: ['query']
       }
     }
   ]
@@ -268,6 +283,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             question: c.question,
             context: c.context,
             created_at: c.created_at
+          }))
+        });
+      }
+
+      case 'search_content': {
+        if (!args?.query) return errorResponse('Parameter "query" is required');
+        const results = searchContent(args.query, {
+          limit: args.limit ?? 20,
+          folder: args.folder || null,
+          tag: args.tag || null
+        });
+        const stats = getFtsStats();
+        return successResponse({
+          query: args.query,
+          count: results.length,
+          indexed_notes: stats.indexed_notes,
+          results: results.map(r => ({
+            note_id: r.note_id,
+            title: r.title,
+            folder: r.folder,
+            snippet: r.snippet,
+            rank: r.rank
           }))
         });
       }
