@@ -214,6 +214,10 @@ Usage:
 
   vault-intelligence search <query> [--limit N] [--folder p] [--tag name]
                                                         Full-text search (BM25)
+  vault-intelligence embed run [limit] [batch_size]    Generate embeddings
+  vault-intelligence embed stats                       Embedding statistics
+  vault-intelligence embed similar <note-id>           Find similar notes
+  vault-intelligence embed search <query>              Semantic search
 
   vault-intelligence graph orphans           Notes without links or tags
   vault-intelligence graph hubs [n]          Top N connected notes
@@ -289,6 +293,12 @@ async function main() {
       case 'search': {
         const { handleSearchCommand } = require('./lib/search');
         handleSearchCommand(positional);
+        break;
+      }
+
+      case 'embed': {
+        const { handleEmbedCommand } = require('./lib/embeddings');
+        await handleEmbedCommand(subcommand, subArgs.slice(1));
         break;
       }
 

@@ -34,6 +34,8 @@ const { classifyAll, getStats, findDormantConnected } = require('./lib/engagemen
 const { listCatalysts } = require('./lib/catalyst.js');
 const { buildSnapshot } = require('./lib/snapshot.js');
 const { searchContent, getFtsStats } = require('./lib/search.js');
+const { findSimilar, semanticSearch } = require('./lib/embeddings.js');
+const { getEmbeddingStats } = require('./lib/database.js');
 
 // Initialize config and database
 try {
@@ -151,7 +153,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: 'search_content',
-      description: 'Full-text search across all vault notes (BM25 ranking via SQLite FTS5). Supports phrases ("exact match"), AND/OR/NOT operators, and folder/tag filters. Returns ranked results with text snippets. Use this when looking for notes by keyword or phrase. For semantic similarity, use semantic_search or hybrid_search instead (when available).',
+      description: 'Full-text search across all vault notes (BM25 ranking via SQLite FTS5). Supports phrases ("exact match"), AND/OR/NOT operators, and folder/tag filters. Returns ranked results with text snippets. Use this when looking for notes by keyword or phrase. For semantic similarity, use semantic_search or hybrid_search instead.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -159,6 +161,30 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           limit: { type: 'number', description: 'Maximum results (default: 20)', default: 20 },
           folder: { type: 'string', description: 'Filter by folder path (prefix match)' },
           tag: { type: 'string', description: 'Filter by tag name (with or without #)' }
+        },
+        required: ['query']
+      }
+    },
+    {
+      name: 'find_similar',
+      description: 'Find notes semantically similar to a given note using vector embeddings (cosine similarity). Unlike find_related (which uses shared tags/links), this finds notes with similar MEANING even if they use completely different words. Requires embeddings to be generated first via the CLI: vault-intelligence embed run.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          note: { type: 'string', description: 'Note id, title, or partial path' },
+          limit: { type: 'number', description: 'Maximum results (default: 10)', default: 10 }
+        },
+        required: ['note']
+      }
+    },
+    {
+      name: 'semantic_search',
+      description: 'Search vault notes by meaning using vector embeddings. Unlike search_content (keyword/FTS5), this finds notes semantically related to the query even without exact word matches. Use for conceptual searches like "ideas about leadership" rather than specific keyword lookups. Requires embeddings to be generated first.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Natural language query' },
+          limit: { type: 'number', description: 'Maximum results (default: 10)', default: 10 }
         },
         required: ['query']
       }
@@ -285,6 +311,69 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             created_at: c.created_at
           }))
         });
+      }
+
+      case 'find_similar': {
+        if (!args?.note) return errorResponse('Parameter "note" is required');
+        // Resolve note id by exact match, partial path, or title.
+        const db = getDb();
+        let noteId = args.note;
+        const direct = db.prepare('SELECT note_id FROM notes WHERE note_id = ?').get(noteId);
+        if (!direct) {
+          const fuzzy = db.prepare(`
+            SELECT note_id FROM notes
+            WHERE note_id LIKE ? OR title LIKE ?
+            LIMIT 1
+          `).get(`%${args.note}%`, `%${args.note}%`);
+          if (!fuzzy) return errorResponse(`Note not found: ${args.note}`);
+          noteId = fuzzy.note_id;
+        }
+        const limit = args?.limit ?? 10;
+        const results = findSimilar(noteId, limit);
+        const enriched = results.map(r => {
+          const note = db.prepare('SELECT title, folder FROM notes WHERE note_id = ?').get(r.note_id);
+          return {
+            note_id: r.note_id,
+            title: note?.title,
+            folder: note?.folder,
+            similarity: parseFloat((r.score * 100).toFixed(1))
+          };
+        });
+        return successResponse({
+          query_note_id: noteId,
+          count: enriched.length,
+          results: enriched
+        });
+      }
+
+      case 'semantic_search': {
+        if (!args?.query) return errorResponse('Parameter "query" is required');
+        const limit = args?.limit ?? 10;
+        try {
+          const results = await semanticSearch(args.query, limit);
+          const stats = getEmbeddingStats();
+          if (results.length === 0 && stats.embedded === 0) {
+            return errorResponse('No embeddings available. Run: vault-intelligence embed run');
+          }
+          const db = getDb();
+          const enriched = results.map(r => {
+            const note = db.prepare('SELECT title, folder FROM notes WHERE note_id = ?').get(r.note_id);
+            return {
+              note_id: r.note_id,
+              title: note?.title,
+              folder: note?.folder,
+              similarity: parseFloat((r.score * 100).toFixed(1))
+            };
+          });
+          return successResponse({
+            query: args.query,
+            count: enriched.length,
+            embedded_notes: stats.embedded,
+            results: enriched
+          });
+        } catch (err) {
+          return errorResponse(`semantic_search failed: ${err.message}`);
+        }
       }
 
       case 'search_content': {
