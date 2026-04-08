@@ -1,0 +1,33 @@
+name: Question
+description: Ask a question about usage, setup, or behavior
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening a question, please check:
+        - [README](../../README.md)
+        - [docs/MCP_SETUP.md](../../docs/MCP_SETUP.md)
+        - [docs/PROVIDERS.md](../../docs/PROVIDERS.md)
+        - [docs/PRIVACY.md](../../docs/PRIVACY.md)
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to do? What have you tried so far?
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: obsidian-intelligence version
+      placeholder: "1.1.0"

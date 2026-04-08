@@ -1,0 +1,52 @@
+name: Feature Request
+description: Suggest a new feature or improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the use case or pain point.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - CLI
+        - MCP server
+        - Indexing / database
+        - Search (FTS / semantic / hybrid)
+        - Graph analysis
+        - Engagement / catalysts
+        - LLM enrichment
+        - Embeddings / providers
+        - Reports
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Project principles
+      description: Please confirm your proposal aligns with the project.
+      options:
+        - label: Local-first — works without sending vault contents to a remote service
+        - label: Provider-agnostic — does not hardcode a specific LLM/embeddings vendor
+        - label: Optional — does not break existing no-LLM workflows
