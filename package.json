@@ -1,7 +1,7 @@
 {
   "name": "obsidian-intelligence",
-  "version": "1.0.0",
-  "description": "Structural analysis, engagement tracking, and AI-generated catalyst questions for Obsidian vaults",
+  "version": "1.1.0",
+  "description": "Make your Obsidian vault a first-class knowledge source for any MCP-enabled AI assistant. Local, private, headless. Graph analysis + FTS5 + semantic search + hybrid RRF + LLM enrichment.",
   "main": "vault-intelligence.js",
   "bin": {
     "vault-intelligence": "./vault-intelligence.js"
@@ -15,11 +15,28 @@
     "test:coverage": "vitest run --coverage",
     "report": "node vault-intelligence.js report"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "keywords": [
     "obsidian",
     "vault",
+    "knowledge-management",
     "mcp",
-    "knowledge-management"
+    "model-context-protocol",
+    "claude-desktop",
+    "claude-code",
+    "cursor",
+    "openwebui",
+    "rag",
+    "semantic-search",
+    "embeddings",
+    "fts5",
+    "hybrid-search",
+    "ollama",
+    "graph-analysis",
+    "second-brain",
+    "pkm"
   ],
   "repository": {
     "type": "git",
@@ -29,6 +46,14 @@
     "url": "https://github.com/GuideThomas/obsidian-intelligence/issues"
   },
   "homepage": "https://github.com/GuideThomas/obsidian-intelligence#readme",
+  "files": [
+    "vault-intelligence.js",
+    "mcp-server.mjs",
+    "lib/",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "dependencies": {
     "better-sqlite3": "^11.7.0",
     "@modelcontextprotocol/sdk": "^1.12.1",
@@ -44,6 +69,6 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "author": "Thomas Winkler",
+  "author": "Thomas Winkler <mail@thomaswinkler.art>",
   "license": "MIT"
 }

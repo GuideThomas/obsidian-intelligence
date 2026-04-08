@@ -1,0 +1,33 @@
+{
+  "name": "obsidian-intelligence-docs",
+  "version": "0.1.0",
+  "description": "Optional document ingestion subpackage for obsidian-intelligence. Indexes external documents (txt, md, html — pdf/docx in 1.2) into the same SQLite store, with chunking and embedding support.",
+  "main": "lib/index.js",
+  "bin": {
+    "obsidian-intelligence-docs": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "keywords": [
+    "obsidian-intelligence",
+    "document-ingestion",
+    "rag",
+    "chunking"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GuideThomas/obsidian-intelligence.git",
+    "directory": "packages/docs-ingest"
+  },
+  "homepage": "https://github.com/GuideThomas/obsidian-intelligence/tree/main/packages/docs-ingest#readme",
+  "peerDependencies": {
+    "obsidian-intelligence": "^1.1.0",
+    "better-sqlite3": "^11.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "Thomas Winkler <mail@thomaswinkler.art>",
+  "license": "MIT"
+}
