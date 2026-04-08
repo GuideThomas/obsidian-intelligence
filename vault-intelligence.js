@@ -219,6 +219,9 @@ Usage:
   vault-intelligence embed similar <note-id>           Find similar notes
   vault-intelligence embed search <query>              Semantic search
 
+  vault-intelligence enrich run [limit] [delay_ms]     LLM metadata enrichment
+  vault-intelligence enrich stats                      Enrichment statistics
+
   vault-intelligence graph orphans           Notes without links or tags
   vault-intelligence graph hubs [n]          Top N connected notes
   vault-intelligence graph backlinks <note>  Who links to this note?
@@ -299,6 +302,12 @@ async function main() {
       case 'embed': {
         const { handleEmbedCommand } = require('./lib/embeddings');
         await handleEmbedCommand(subcommand, subArgs.slice(1));
+        break;
+      }
+
+      case 'enrich': {
+        const { handleEnrichCommand } = require('./lib/enrichment');
+        await handleEnrichCommand(subcommand, subArgs.slice(1));
         break;
       }
 
