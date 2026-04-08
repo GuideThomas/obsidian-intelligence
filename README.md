@@ -24,6 +24,18 @@ Your Obsidian vault is your most valuable knowledge base. But no AI assistant ca
 └─────────────────────────────────────────────────────────────┘
 ```
 
+<p align="center">
+  <img src="docs/screenshots/terminal-status.png" alt="vault-intelligence status output" width="680"/>
+  <br/>
+  <em>The CLI at a glance — <code>vault-intelligence status</code> on the bundled test fixture vault.</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/report.png" alt="HTML report with health score, engagement chart, tag cloud" width="680"/>
+  <br/>
+  <em>The self-contained HTML report (<code>vault-intelligence report</code>) — dark theme, Chart.js visualizations, health score, engagement buckets, tag cloud. Works offline.</em>
+</p>
+
 ## Why this exists
 
 The AI tooling ecosystem just converged on a shared standard: MCP. What was an Anthropic experiment six months ago is now the de-facto interface across Claude Desktop, Claude Code, Cursor, OpenWebUI, and a growing list of clients.
