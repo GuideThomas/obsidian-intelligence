@@ -257,9 +257,30 @@ Run `vault-intelligence --help` for the full list.
 
 Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Bug reports, feature requests, and questions all live in [GitHub Issues](https://github.com/GuideThomas/obsidian-intelligence/issues).
 
+## Acknowledgements
+
+Built on the shoulders of:
+
+- [@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk) — the MCP protocol and reference server implementation
+- [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) — the fast, synchronous SQLite binding that makes indexing feel instant
+- [Chart.js](https://www.chartjs.org/) — the charts in the HTML report
+- [dotenv](https://github.com/motdotla/dotenv) — zero-config env loading
+- [chokidar](https://github.com/paulmillr/chokidar) — optional filesystem watcher
+
+And of course the [Obsidian](https://obsidian.md) community, whose plugins,
+vaults, and conversations shaped the design.
+
 ## License
 
 [MIT](LICENSE)
+
+## Trademarks
+
+This project is an independent, community-built tool. It is **not affiliated
+with, endorsed by, or sponsored by Obsidian.md or Dynalist Inc.** "Obsidian"
+is a trademark of its respective owner and is used here nominatively to
+describe compatibility. All other trademarks are the property of their
+respective owners.
 
 ---
 
