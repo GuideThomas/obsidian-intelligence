@@ -2,9 +2,13 @@
 
 > **Make your Obsidian vault a first-class knowledge source for any MCP-enabled AI assistant. Local, private, headless.**
 
+[![npm version](https://img.shields.io/npm/v/obsidian-intelligence.svg)](https://www.npmjs.com/package/obsidian-intelligence)
+[![npm downloads](https://img.shields.io/npm/dm/obsidian-intelligence.svg)](https://www.npmjs.com/package/obsidian-intelligence)
+[![CI](https://github.com/GuideThomas/obsidian-intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/GuideThomas/obsidian-intelligence/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](#requirements)
 [![Tests](https://img.shields.io/badge/tests-255%20passing-brightgreen)](#tests)
+[![MCP](https://img.shields.io/badge/MCP-compatible-blue)](https://modelcontextprotocol.io)
 
 Your Obsidian vault is your most valuable knowledge base. But no AI assistant can read it — not without uploading your notes to some cloud service.
 
@@ -92,7 +96,7 @@ You can run the entire tool without an API key. With Ollama installed locally (`
 ### 60 seconds: install and index
 
 ```bash
-# Install
+# Install globally
 npm install -g obsidian-intelligence
 
 # Index your vault
@@ -103,6 +107,13 @@ vault-intelligence status
 vault-intelligence graph orphans
 vault-intelligence search "your query"
 vault-intelligence report --open    # opens HTML report in browser
+```
+
+Or skip the install and run directly with `npx`:
+
+```bash
+VAULT_PATH=/path/to/your/vault npx obsidian-intelligence index
+VAULT_PATH=/path/to/your/vault npx obsidian-intelligence status
 ```
 
 No API key needed for any of that.
