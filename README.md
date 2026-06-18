@@ -84,6 +84,7 @@ Each tool is available the moment your MCP client connects. The assistant decide
 - **Watch mode** for automatic re-indexing
 - **CouchDB adapter** for [Obsidian LiveSync](https://github.com/vrtmrz/obsidian-livesync) users
 - **Optional document ingestion** ([obsidian-intelligence-docs](packages/docs-ingest/), text/markdown/html — pdf/docx in v1.2)
+- **OKF-aligned** — a Markdown vault is already an *Open Knowledge Format* corpus (Google Cloud, 2026): one concept per file, YAML frontmatter (`type` the only required field), and `[[wikilinks]]`/Markdown links forming a knowledge graph. Obsidian Intelligence reads, indexes, and visualizes exactly that shape — **locally**, with no BigQuery enrichment agent and no cloud, the same files any OKF-aware tool can consume.
 
 ## The privacy story
 

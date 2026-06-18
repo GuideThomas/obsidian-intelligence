@@ -111,6 +111,32 @@ Nach Aufwand-Nutzen sortiert:
 
 ---
 
+## Positionierungs-Angle: OKF-kompatibler Local Reader (neu, Sumup #23, 18.06.2026)
+
+**Auslöser:** Google Cloud hat im Juni 2026 das **Open Knowledge Format (OKF)** v0.1
+vorgestellt (heise/iX-Bericht 16.06.2026) — eine offene Spezifikation, die
+Kontextwissen für KI-Agenten als **Sammlung von Markdown-Dateien** standardisiert:
+ein Konzept pro Datei, YAML-Frontmatter (`type` als einziges Pflichtfeld),
+Markdown-Links als Wissensgraph, plus Referenz-Tools (BigQuery-Enrichment-Agent +
+statischer HTML-Graph-Viewer). Der Artikel nennt **Obsidian-Vaults, `CLAUDE.md` und
+`AGENTS.md` ausdrücklich als Vorläufer** dieses Musters.
+
+**Warum das für uns ein Hebel ist:** `obsidian-intelligence` erfüllt dieses Muster
+faktisch bereits — Markdown + Frontmatter + Wikilink-Graph + HTML-Report-Viewer,
+alles **lokal** statt über eine Cloud-Plattform. Damit lässt sich das Tool als
+*„lokaler, privater OKF-Reader/Analyzer"* positionieren — ein Standard-Begriff, an
+dem sich gerade Aufmerksamkeit sammelt.
+
+**Konkrete Schritte (nach ROI):**
+- README-Bullet „OKF-aligned" gesetzt (✅ 18.06.2026).
+- **Hoch-ROI:** r/ObsidianMD- + HN-Angle nachschärfen → *„A local, private OKF reader
+  for your Obsidian vault — no BigQuery, no cloud."* (greift den frischen OKF-Hype auf).
+- **Follow-up (verifizieren, nicht behaupten):** OKF-Spec v0.1 (GitHub) gegen unser
+  Frontmatter prüfen; offenes Item: rendert Googles statischer OKF-HTML-Viewer ein
+  exportiertes Vault-Bundle fehlerfrei? → siehe Dream-Hypothese Sumup #23.
+
+---
+
 ## Metriken die wir tracken sollten
 
 Ohne externes Analytics, aber leicht abrufbar:
