@@ -29,6 +29,9 @@ jobs:
         run: npm ci
 
       - name: Run tests
+        # vitest 3 (Security-Bump fuer GHSA-5xrq-8626-4rwp) benoetigt Node 20+.
+        # Auf Node 18 nur die Runtime-Load-Checks unten (engines bleibt >=18).
+        if: matrix.node != '18'
         run: npm test
 
       - name: Verify CLI loads
