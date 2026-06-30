@@ -121,19 +121,27 @@ Markdown-Links als Wissensgraph, plus Referenz-Tools (BigQuery-Enrichment-Agent 
 statischer HTML-Graph-Viewer). Der Artikel nennt **Obsidian-Vaults, `CLAUDE.md` und
 `AGENTS.md` ausdrücklich als Vorläufer** dieses Musters.
 
-**Warum das für uns ein Hebel ist:** `obsidian-intelligence` erfüllt dieses Muster
-faktisch bereits — Markdown + Frontmatter + Wikilink-Graph + HTML-Report-Viewer,
-alles **lokal** statt über eine Cloud-Plattform. Damit lässt sich das Tool als
-*„lokaler, privater OKF-Reader/Analyzer"* positionieren — ein Standard-Begriff, an
-dem sich gerade Aufmerksamkeit sammelt.
+**Warum das für uns ein Hebel ist:** `obsidian-intelligence` teilt das **Modell** —
+Markdown + Frontmatter + Link-Graph + HTML-Report-Viewer, alles **lokal** statt über
+eine Cloud-Plattform. Damit lässt sich das Tool als *„lokaler, privater
+OKF-kompatibler Reader/Analyzer"* positionieren — ein Standard-Begriff, an dem sich
+gerade Aufmerksamkeit sammelt.
+
+**Wichtig (Desk-Verifikation 30.06.2026, Sumup #28 — siehe `dream-2026-06-18-okf-viewer-interop`):**
+Ein roher Vault ist **noch kein conformantes** OKF-Bundle. Zwei harte Deltas gegen die
+Spec (`GoogleCloudPlatform/knowledge-catalog`): (1) OKF verlangt ein nicht-leeres
+`type`-Feld auf **jedem** Concept — Vaults/OI-Fixture haben das i.d.R. nicht;
+(2) OKFs Graph-Kanten kommen aus **Standard-Markdown-Links**, der OKF-Viewer (marked.js)
+parst Obsidian-`[[wikilinks]]` nicht. Claim daher von *„is already OKF"* auf
+*„OKF-shaped / OKF-compatible"* entschärft.
 
 **Konkrete Schritte (nach ROI):**
-- README-Bullet „OKF-aligned" gesetzt (✅ 18.06.2026).
-- **Hoch-ROI:** r/ObsidianMD- + HN-Angle nachschärfen → *„A local, private OKF reader
-  for your Obsidian vault — no BigQuery, no cloud."* (greift den frischen OKF-Hype auf).
-- **Follow-up (verifizieren, nicht behaupten):** OKF-Spec v0.1 (GitHub) gegen unser
-  Frontmatter prüfen; offenes Item: rendert Googles statischer OKF-HTML-Viewer ein
-  exportiertes Vault-Bundle fehlerfrei? → siehe Dream-Hypothese Sumup #23.
+- README-Bullet von „OKF-aligned" auf **„OKF-shaped"** präzisiert + Deltas ehrlich benannt (✅ 30.06.2026, Sumup #28).
+- **Hoch-ROI:** r/ObsidianMD- + HN-Angle → *„A local, private OKF-compatible reader
+  for your Obsidian vault — no BigQuery, no cloud."* (greift den OKF-Hype auf, ohne zu überziehen).
+- **Follow-up (optional, macht den Claim wahr):** dünner `okf-export` (type ableiten aus
+  Ordner/Tags/Default `Note` + `[[wikilinks]]` → relative Markdown-Links) → Vault wird
+  conformant, Googles `visualize`-Viewer rendert ihn. Dann Claim auf „exports to OKF" härten.
 
 ---
 
