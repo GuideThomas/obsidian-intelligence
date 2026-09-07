@@ -16,7 +16,7 @@ describe('LLM adapter factory', () => {
   });
 
   it('returns OpenAILLM when provider=openai', () => {
-    const llm = createLLM({ llm: { provider: 'openai', apiKey: 'sk-test', model: 'gpt-4' } });
+    const llm = createLLM({ llm: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'sk-test', model: 'gpt-4' } });
     expect(llm).toBeInstanceOf(OpenAILLM);
     expect(llm.name).toBe('openai');
     expect(llm.model).toBe('gpt-4');
@@ -28,9 +28,28 @@ describe('LLM adapter factory', () => {
     expect(llm.name).toBe('ollama');
   });
 
-  it('auto: picks openai when apiKey is set', () => {
-    const llm = createLLM({ llm: { provider: 'auto', apiKey: 'sk-test' } });
+  it('auto: picks openai when apiKey AND endpoint are set', () => {
+    const llm = createLLM({ llm: { provider: 'auto', url: 'https://gateway.example.com/v1', apiKey: 'sk-test' } });
     expect(llm.name).toBe('openai');
+  });
+
+  // 🚨 A13 (07.09.2026): the endpoint is part of the condition. A stray
+  // OPENAI_API_KEY used to be enough — config.js then supplied
+  // api.openai.com as the default and every call went there directly,
+  // past the gateway's cost accounting and alias mapping. Nothing failed,
+  // so nothing was reported (principle-fail-open-default-trap).
+  it('auto: a key without an endpoint is NOT openai', () => {
+    const llm = createLLM({ llm: { provider: 'auto', apiKey: 'sk-test' } });
+    expect(llm.name).toBe('none');
+  });
+
+  it('provider=openai without an endpoint is a configuration error, not a call', () => {
+    expect(() => createLLM({ llm: { provider: 'openai', apiKey: 'sk-test' } }))
+      .toThrow(/LLM_API_URL is not set/);
+    // And the message must say where to point it — an error nobody can act on
+    // gets worked around, not fixed.
+    expect(() => createLLM({ llm: { provider: 'openai', apiKey: 'sk-test' } }))
+      .toThrow(/gateway/i);
   });
 
   it('auto: picks none when no apiKey is set', () => {
@@ -114,7 +133,7 @@ describe('OpenAILLM via mocked fetch', () => {
       })
     });
 
-    const llm = new OpenAILLM({ apiKey: 'k' });
+    const llm = new OpenAILLM({ url: 'https://gateway.example.com/v1', apiKey: 'k' });
     const result = await llm.chat({ messages: [{ role: 'user', content: 'hi' }], returnMeta: true });
     expect(result).toMatchObject({ content: 'OK', model: 'gpt-4o-mini' });
     expect(result.usage).toBeTruthy();
@@ -127,7 +146,7 @@ describe('OpenAILLM via mocked fetch', () => {
       text: async () => '{"error":"unauthorized"}'
     });
 
-    const llm = new OpenAILLM({ apiKey: 'bad' });
+    const llm = new OpenAILLM({ url: 'https://gateway.example.com/v1', apiKey: 'bad' });
     await expect(llm.chat({ messages: [{ role: 'user', content: 'hi' }] })).rejects.toThrow(/401/);
   });
 
@@ -137,7 +156,7 @@ describe('OpenAILLM via mocked fetch', () => {
       json: async () => ({ error: { message: 'rate limit' } })
     });
 
-    const llm = new OpenAILLM({ apiKey: 'k' });
+    const llm = new OpenAILLM({ url: 'https://gateway.example.com/v1', apiKey: 'k' });
     await expect(llm.chat({ messages: [{ role: 'user', content: 'hi' }] })).rejects.toThrow(/rate limit/);
   });
 });
@@ -188,9 +207,15 @@ describe('detectProvider (async)', () => {
     expect(provider).toBe('openai');
   });
 
-  it('returns openai when apiKey is set and provider=auto', async () => {
-    const provider = await detectProvider({ llm: { provider: 'auto', apiKey: 'k' } });
+  it('returns openai when apiKey AND endpoint are set and provider=auto', async () => {
+    const provider = await detectProvider({ llm: { provider: 'auto', url: 'https://gateway.example.com/v1', apiKey: 'k' } });
     expect(provider).toBe('openai');
+  });
+
+  it('a key without an endpoint does not detect as openai', async () => {
+    global.fetch = vi.fn().mockRejectedValue(new Error('refused'));
+    const provider = await detectProvider({ llm: { provider: 'auto', apiKey: 'k' } });
+    expect(provider).toBe('none');
   });
 
   it('returns ollama when ollama is reachable', async () => {

@@ -87,7 +87,7 @@ describe('hybridSearch - keyword + semantic via RRF', () => {
     });
 
     const cfg = {
-      embeddings: { provider: 'openai', apiKey: 'k', model: 'text-embedding-3-small', dimensions: 4 }
+      embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k', model: 'text-embedding-3-small', dimensions: 4 }
     };
     const result = await hybridSearch('LED', { config: cfg });
 
@@ -109,7 +109,7 @@ describe('hybridSearch - keyword + semantic via RRF', () => {
     });
 
     const cfg = {
-      embeddings: { provider: 'openai', apiKey: 'k', model: 'text-embedding-3-small', dimensions: 4 }
+      embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k', model: 'text-embedding-3-small', dimensions: 4 }
     };
     // Query word that's not in any note
     const result = await hybridSearch('quantum', { config: cfg });
@@ -126,7 +126,7 @@ describe('hybridSearch - keyword + semantic via RRF', () => {
       json: async () => ({ data: [{ embedding: [1, 0, 0, 0] }] })
     });
     const cfg = {
-      embeddings: { provider: 'openai', apiKey: 'k', dimensions: 4 }
+      embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k', dimensions: 4 }
     };
     const result = await hybridSearch('LED', { limit: 1, config: cfg });
     expect(result.results.length).toBeLessThanOrEqual(1);
@@ -140,7 +140,7 @@ describe('hybridSearch - semantic provider failure', () => {
 
   it('falls back to FTS when semantic search throws', async () => {
     global.fetch = vi.fn().mockRejectedValue(new Error('network down'));
-    const cfg = { embeddings: { provider: 'openai', apiKey: 'k' } };
+    const cfg = { embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k' } };
     const result = await hybridSearch('LED', { config: cfg });
     expect(result.fts_count).toBeGreaterThan(0);
     expect(result.semantic_used).toBe(false);
@@ -173,7 +173,7 @@ describe('hybridSearch - RRF formula', () => {
       ok: true,
       json: async () => ({ data: [{ embedding: [1, 0] }] })
     });
-    const cfg = { embeddings: { provider: 'openai', apiKey: 'k', model: 'm', dimensions: 2 } };
+    const cfg = { embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k', model: 'm', dimensions: 2 } };
 
     const result = await hybridSearch('sharedterm', { config: cfg });
 

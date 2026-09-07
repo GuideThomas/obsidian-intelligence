@@ -180,9 +180,10 @@ export GEMINI_API_KEY=your-key
 vault-intelligence embed run
 ```
 
-**Cloud (OpenAI):**
+**Cloud (OpenAI-compatible — OpenAI, LiteLLM, vLLM, OpenRouter, …):**
 ```bash
 export EMBEDDINGS_PROVIDER=openai
+export LLM_API_URL=https://api.openai.com/v1   # required — no default endpoint
 export LLM_API_KEY=sk-...
 vault-intelligence embed run
 ```
@@ -200,6 +201,36 @@ VAULT_PATH=/path/to/your/vault
 ```
 
 That's it. Indexing, graph queries, FTS search, engagement, and HTML reports all work.
+
+### The endpoint is explicit — there is no default one
+
+Anything that talks to a model needs **both** a key and an endpoint:
+
+```bash
+export LLM_API_URL=http://localhost:4000/v1    # your gateway (LiteLLM, vLLM, …)
+export LLM_API_KEY=...                         # key for that endpoint
+export LLM_MODEL=gpt-4o-mini                   # alias name the endpoint resolves
+```
+
+- **`LLM_API_URL` has no default.** If it is unset, the OpenAI-compatible
+  providers refuse to start with a message telling you what to set — they do
+  **not** quietly fall back to `https://api.openai.com/v1`. Until 07.09.2026
+  they did, which meant a stray `OPENAI_API_KEY` anywhere in the environment
+  was enough to route every request straight to OpenAI, past whatever gateway
+  was supposed to see it (cost accounting, spend limits, model aliasing).
+- **`LLM_PROVIDER=auto`** (the default) picks `openai` only when a key *and*
+  an endpoint are configured; otherwise it stays `none`. `EMBEDDINGS_PROVIDER`
+  behaves the same way. Ollama and Gemini are unaffected — they carry their own
+  endpoint.
+- **`LLM_MODEL` (default `gpt-4o-mini`) is an alias name**, not a route. It is
+  sent to whatever `LLM_API_URL` points at; a gateway typically maps it onto
+  whichever model currently serves that tier.
+- **Calling OpenAI directly is still supported** — say so:
+  `LLM_API_URL=https://api.openai.com/v1`.
+
+`EMBEDDINGS_API_URL` overrides the endpoint for embeddings only; unset, it
+follows `LLM_API_URL`. See [`docs/PROVIDERS.md`](docs/PROVIDERS.md) for the
+per-provider details.
 
 ### Provider matrix
 

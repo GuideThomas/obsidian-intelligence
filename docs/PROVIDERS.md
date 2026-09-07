@@ -91,9 +91,16 @@ GEMINI_API_KEY=...
 **OpenAI**
 ```ini
 EMBEDDINGS_PROVIDER=openai
+LLM_API_URL=https://api.openai.com/v1
 LLM_API_KEY=sk-...
 EMBEDDINGS_MODEL=text-embedding-3-small
 ```
+
+> ⚠️ **`LLM_API_URL` (or `EMBEDDINGS_API_URL`) is required** for the
+> OpenAI-compatible providers — since 07.09.2026 there is no implicit default
+> endpoint. Leaving it unset raises a configuration error instead of quietly
+> sending your notes to `api.openai.com`, and `LLM_PROVIDER=auto` /
+> `EMBEDDINGS_PROVIDER=auto` will not select `openai` without one.
 
 ---
 

@@ -195,7 +195,7 @@ describe('enrichBatch with mocked LLM', () => {
       })
     });
 
-    const cfg = { llm: { provider: 'openai', apiKey: 'k', model: 'gpt-4o-mini' } };
+    const cfg = { llm: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k', model: 'gpt-4o-mini' } };
     const result = await enrichBatch({ limit: 10, delayMs: 0, config: cfg });
 
     // Note 'c.md' has body 'short' (< 30 chars) so it gets skipped
@@ -211,7 +211,7 @@ describe('enrichBatch with mocked LLM', () => {
       status: 500,
       text: async () => 'server error'
     });
-    const cfg = { llm: { provider: 'openai', apiKey: 'k' } };
+    const cfg = { llm: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k' } };
     const result = await enrichBatch({ limit: 10, delayMs: 0, config: cfg });
     expect(result.errors).toBeGreaterThan(0);
     expect(result.enriched).toBe(0);
@@ -222,7 +222,7 @@ describe('enrichBatch with mocked LLM', () => {
       ok: true,
       json: async () => ({ choices: [{ message: { content: 'sorry I cannot do that' } }] })
     });
-    const cfg = { llm: { provider: 'openai', apiKey: 'k' } };
+    const cfg = { llm: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k' } };
     const result = await enrichBatch({ limit: 10, delayMs: 0, config: cfg });
     expect(result.enriched).toBe(0);
     expect(result.errors).toBe(0);

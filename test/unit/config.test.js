@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { loadConfig, resetConfig } from '../../lib/config.js';
+import { loadConfig, resetConfig, requireApiUrl } from '../../lib/config.js';
+const { createLLM } = require('../../lib/adapters/llm');
+const { createEmbedder } = require('../../lib/adapters/embeddings');
 
 describe('loadConfig', () => {
   const originalEnv = process.env;
@@ -94,5 +96,87 @@ describe('loadConfig', () => {
     const config = loadConfig();
     expect(config.llm.url).toBe('https://openai.proxy.com');
     expect(config.llm.apiKey).toBe('sk-openai');
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════
+// A13 — no silent direct route to OpenAI (07.09.2026)
+//
+// 🚨 THE BUG: `llm.url` defaulted to `https://api.openai.com/v1`, and the
+// adapter factories treated "a key is present" as "use openai". A plain
+// OPENAI_API_KEY in the environment therefore sent every chat, catalyst,
+// enrichment and embedding call directly to OpenAI — around the gateway that
+// does the cost accounting, the spend guardrails and the alias mapping.
+// It worked, so nobody reported it: a fail-open default
+// (principle-fail-open-default-trap).
+//
+// These tests hold the NEGATIVE path: no endpoint configured must mean an
+// error, and no request. `global.fetch` is replaced by a spy that throws —
+// if any of these paths still reached the network, the test would say so.
+// ══════════════════════════════════════════════════════════════════════
+describe('A13: an unset LLM_API_URL is an error, not a route to OpenAI', () => {
+  const originalEnv = process.env;
+  let originalFetch;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.LLM_API_URL;
+    delete process.env.OPENAI_BASE_URL;
+    delete process.env.LLM_PROVIDER;
+    resetConfig();
+    originalFetch = global.fetch;
+    global.fetch = vi.fn(() => { throw new Error('no network call must happen here'); });
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+    process.env = originalEnv;
+    resetConfig();
+  });
+
+  it('no LLM_API_URL means no url — not api.openai.com', () => {
+    process.env.OPENAI_API_KEY = 'sk-stray';
+    const config = loadConfig();
+    expect(config.llm.url).toBe('');
+    expect(config.llm.url).not.toContain('openai.com');
+    expect(config.embeddings.url).toBe('');
+  });
+
+  it('provider=auto with a stray key resolves to none, not openai', () => {
+    process.env.OPENAI_API_KEY = 'sk-stray';
+    const config = loadConfig();
+    expect(config.llm.provider).toBe('auto');
+    expect(createLLM(config).name).toBe('none');
+    expect(createEmbedder(config).name).toBe('none');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('an explicit openai provider without an endpoint fails with a usable message', () => {
+    process.env.LLM_PROVIDER = 'openai';
+    process.env.OPENAI_API_KEY = 'sk-stray';
+    const config = loadConfig();
+    expect(() => createLLM(config)).toThrow(/LLM_API_URL is not set/);
+    // The message has to say what to do — an error nobody can act on gets
+    // worked around instead of fixed.
+    expect(() => createLLM(config)).toThrow(/gateway/i);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('requireApiUrl accepts a configured endpoint and trims it', () => {
+    // Positive control: without this, the tests above would also pass if the
+    // guard simply rejected everything.
+    expect(requireApiUrl('  https://gateway.example.com/v1  '))
+      .toBe('https://gateway.example.com/v1');
+    expect(() => requireApiUrl('   ')).toThrow(/LLM_API_URL is not set/);
+    expect(() => requireApiUrl(undefined)).toThrow(/LLM_API_URL is not set/);
+  });
+
+  it('OpenAI stays reachable — but only when it is named explicitly', () => {
+    process.env.LLM_API_URL = 'https://api.openai.com/v1';
+    process.env.OPENAI_API_KEY = 'sk-deliberate';
+    const config = loadConfig();
+    const llm = createLLM(config);
+    expect(llm.name).toBe('openai');
+    expect(llm.baseUrl).toBe('https://api.openai.com/v1');
   });
 });

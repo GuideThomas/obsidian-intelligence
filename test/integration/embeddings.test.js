@@ -223,7 +223,7 @@ describe('embedBatch with mock embedder', () => {
     });
 
     const cfg = {
-      embeddings: { provider: 'openai', apiKey: 'sk-test', model: 'text-embedding-3-small' }
+      embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'sk-test', model: 'text-embedding-3-small' }
     };
     const result = await embedBatch({ limit: 10, batchSize: 10, delayMs: 0, config: cfg });
     expect(result.embedded).toBe(3);
@@ -237,7 +237,7 @@ describe('embedBatch with mock embedder', () => {
       status: 500,
       text: async () => 'server error'
     });
-    const cfg = { embeddings: { provider: 'openai', apiKey: 'k' } };
+    const cfg = { embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k' } };
     const result = await embedBatch({ limit: 10, batchSize: 10, delayMs: 0, config: cfg });
     expect(result.errors).toBeGreaterThan(0);
     expect(result.embedded).toBe(0);
@@ -264,7 +264,7 @@ describe('semanticSearch', () => {
     });
 
     const cfg = {
-      embeddings: { provider: 'openai', apiKey: 'k', model: 'text-embedding-3-small', dimensions: 4 }
+      embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k', model: 'text-embedding-3-small', dimensions: 4 }
     };
     const results = await semanticSearch('test query', 5, cfg);
     expect(results.length).toBe(3);
@@ -278,7 +278,7 @@ describe('semanticSearch', () => {
       json: async () => ({ data: [{ embedding: [1, 0] }] })
     });
     const cfg = {
-      embeddings: { provider: 'openai', apiKey: 'k', dimensions: 2 }
+      embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k', dimensions: 2 }
     };
     const results = await semanticSearch('q', 5, cfg);
     expect(results).toEqual([]);

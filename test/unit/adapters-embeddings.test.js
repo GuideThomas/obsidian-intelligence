@@ -23,7 +23,7 @@ describe('Embeddings adapter factory', () => {
   });
 
   it('returns OpenAIEmbeddings when provider=openai', () => {
-    const e = createEmbedder({ embeddings: { provider: 'openai', apiKey: 'k' } });
+    const e = createEmbedder({ embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k' } });
     expect(e).toBeInstanceOf(OpenAIEmbeddings);
     expect(e.dimensions).toBe(1536);
     expect(e.model).toBe('text-embedding-3-small');
@@ -41,9 +41,17 @@ describe('Embeddings adapter factory', () => {
     expect(e.name).toBe('gemini');
   });
 
-  it('auto: falls back to openai if only LLM key', () => {
-    const e = createEmbedder({ embeddings: { provider: 'auto', apiKey: 'o' } });
+  it('auto: falls back to openai when key AND endpoint are set', () => {
+    const e = createEmbedder({ embeddings: { provider: 'auto', url: 'https://gateway.example.com/v1', apiKey: 'o' } });
     expect(e.name).toBe('openai');
+  });
+
+  // 🚨 A13 (07.09.2026): a key WITHOUT an endpoint used to resolve to 'openai',
+  // and config.js then filled in api.openai.com — every note in the vault was
+  // embedded straight at OpenAI, past the gateway. Silent, so unnoticed.
+  it('auto: a key without an endpoint is NOT openai', () => {
+    const e = createEmbedder({ embeddings: { provider: 'auto', apiKey: 'o' } });
+    expect(e.name).toBe('none');
   });
 
   it('auto: returns none if nothing configured', () => {
@@ -52,7 +60,7 @@ describe('Embeddings adapter factory', () => {
   });
 
   it('respects custom dimensions override', () => {
-    const e = createEmbedder({ embeddings: { provider: 'openai', apiKey: 'k', dimensions: 512 } });
+    const e = createEmbedder({ embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k', dimensions: 512 } });
     expect(e.dimensions).toBe(512);
   });
 
@@ -89,7 +97,7 @@ describe('OpenAIEmbeddings via mocked fetch', () => {
       })
     });
 
-    const e = new OpenAIEmbeddings({ apiKey: 'k' });
+    const e = new OpenAIEmbeddings({ url: 'https://gateway.example.com/v1', apiKey: 'k' });
     const result = await e.embed(['foo', 'bar']);
     expect(result).toHaveLength(2);
     expect(result[0]).toBeInstanceOf(Float32Array);
@@ -98,12 +106,12 @@ describe('OpenAIEmbeddings via mocked fetch', () => {
   });
 
   it('returns empty array on empty input', async () => {
-    const e = new OpenAIEmbeddings({ apiKey: 'k' });
+    const e = new OpenAIEmbeddings({ url: 'https://gateway.example.com/v1', apiKey: 'k' });
     expect(await e.embed([])).toEqual([]);
   });
 
   it('throws on missing apiKey', async () => {
-    const e = new OpenAIEmbeddings({});
+    const e = new OpenAIEmbeddings({ url: 'https://gateway.example.com/v1' });
     await expect(e.embed(['hi'])).rejects.toThrow(/api key/i);
   });
 
@@ -113,7 +121,7 @@ describe('OpenAIEmbeddings via mocked fetch', () => {
       status: 429,
       text: async () => 'rate limited'
     });
-    const e = new OpenAIEmbeddings({ apiKey: 'k' });
+    const e = new OpenAIEmbeddings({ url: 'https://gateway.example.com/v1', apiKey: 'k' });
     await expect(e.embed(['hi'])).rejects.toThrow(/429/);
   });
 });
@@ -181,7 +189,7 @@ describe('detectEmbeddingsProvider (async)', () => {
   afterEach(() => { global.fetch = originalFetch; });
 
   it('returns explicit provider when set', async () => {
-    const provider = await detectEmbeddingsProvider({ embeddings: { provider: 'openai', apiKey: 'k' } });
+    const provider = await detectEmbeddingsProvider({ embeddings: { provider: 'openai', url: 'https://gateway.example.com/v1', apiKey: 'k' } });
     expect(provider).toBe('openai');
   });
 
