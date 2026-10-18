@@ -50,7 +50,7 @@ try {
 // --- MCP Server ---
 
 const server = new Server(
-  { name: 'obsidian-intelligence', version: '1.1.0' },
+  { name: 'obsidian-intelligence', version: '1.2.0' },
   { capabilities: { tools: {} } }
 );
 

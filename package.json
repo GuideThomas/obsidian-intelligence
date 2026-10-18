@@ -1,6 +1,6 @@
 {
   "name": "obsidian-intelligence",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Make your Obsidian vault a first-class knowledge source for any MCP-enabled AI assistant. Local, private, headless. Graph analysis + FTS5 + semantic search + hybrid RRF + LLM enrichment.",
   "main": "vault-intelligence.js",
   "bin": {
@@ -55,7 +55,7 @@
     "CHANGELOG.md"
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "better-sqlite3": "^11.7.0",
     "dotenv": "^16.3.1"
   },

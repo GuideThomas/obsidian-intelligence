@@ -10,21 +10,22 @@ Einschätzung, welche Kanäle sich wirklich lohnen.
 ### npm Registry
 
 - **URL:** https://www.npmjs.com/package/obsidian-intelligence
-- **Status:** Publiziert (v1.1.0)
+- **Status:** Publiziert (v1.2.0, Oktober 2026; davor v1.1.0 vom 08.04.2026)
 - **Nutzen:** Primärer Installationsweg (`npx obsidian-intelligence`).
   Hauptkanal für Developer, die MCP-Setups konfigurieren.
 
 ### GitHub Repository
 
 - **URL:** https://github.com/GuideThomas/obsidian-intelligence
-- **Status:** Public, MIT-Lizenz, v1.1.0 getaggt + Release
+- **Status:** Public, MIT-Lizenz, v1.2.0 getaggt + Release
 - **Nutzen:** Source-of-Truth für Issues, Contributions, Stars-Signal.
 
-### awesome-mcp-servers (PR offen)
+### awesome-mcp-servers (PR geschlossen)
 
 - **PR:** https://github.com/punkpeye/awesome-mcp-servers/pull/4372
 - **Kategorie:** Knowledge & Memory
-- **Status:** Review-Bedingung — Glama-Listing mit Security/Quality-Scores erforderlich
+- **Status:** Am 27.05.2026 vom Maintainer wegen Inaktivität geschlossen — Bedingung war ein
+  Glama-Listing mit bewerteten Security/Quality-Scores. Neuer PR möglich, sobald Glama bewertet hat.
 - **Nutzen:** Reichweitenstarker Katalog, wird oft als "Starting Point" für
   MCP-Einsteiger verwendet.
 
@@ -32,7 +33,7 @@ Einschätzung, welche Kanäle sich wirklich lohnen.
 
 - **URL:** https://glama.ai/mcp/servers (Eintrag unter Author `GuideThomas`)
 - **Manifest:** `glama.json` im Repo-Root (Maintainer-Verifikation)
-- **Status:** Gelistet, Security/Quality Scan wartet auf Re-Crawl
+- **Status:** Gelistet; Security/Quality-Scores zeigt die Seite am 18.10.2026 weiterhin nicht an
 - **Nutzen:** **Primär Gatekeeper für awesome-mcp-servers PR** (siehe unten).
   Sekundär: eigene Discovery-Reichweite.
 

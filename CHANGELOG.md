@@ -1,6 +1,57 @@
 # Changelog
 
-## 1.1.0 (unreleased)
+## 1.2.0 — 2026-10-18
+
+A maintenance and hardening release. No new MCP tools, no schema changes —
+but one configuration change you need to check before upgrading.
+
+### ⚠️ Configuration change: `LLM_API_URL` is now required for OpenAI-compatible providers
+
+Until 1.1.0, an `OPENAI_API_KEY` or `LLM_API_KEY` on its own was enough:
+`auto` mode picked OpenAI and silently sent every chat, catalyst, enrichment
+and embedding call to `https://api.openai.com/v1` — even if you meant to go
+through a gateway or a local server. There is no default endpoint anymore.
+
+**What to do:** if you use an OpenAI-compatible provider, set the endpoint
+explicitly, e.g.
+
+```bash
+LLM_API_URL=https://api.openai.com/v1      # OpenAI directly
+LLM_API_URL=http://localhost:4000/v1       # your own gateway
+```
+
+Without it, `auto` resolves to `none` (LLM features off, with a clear
+message), and `LLM_PROVIDER=openai` fails with a configuration error before
+any request is made. Ollama and Gemini are unaffected — they carry their own
+endpoint. Embeddings fall back to `LLM_API_URL` unless `EMBEDDINGS_API_URL`
+is set.
+
+### Security
+
+- **No silent direct route to OpenAI** (see above).
+- **Browser open without a shell:** `report.js` used `exec()` with an
+  interpolated path when opening the HTML report; a crafted `--output` value
+  could inject shell commands. It now uses `execFile` with an argument array.
+- **MCP SDK 1.32.1** (was 1.29.0): fixes an advisory in the SDK's OAuth client
+  and pulls patched transitive dependencies. `npm audit --omit=dev` reports
+  0 vulnerabilities as of 18.10.2026.
+- Dev dependencies: vitest 3 → 4 (critical/high advisories in the test
+  tooling). One moderate advisory in vitest remains until vitest 5; it
+  affects the test runner only, not the published package.
+
+### Changed
+
+- Error messages for an unconfigured LLM/embeddings provider now name the
+  endpoint variable, not just the key.
+- README: tool table lists all 14 MCP tools (`find_similar` was missing),
+  positioning as an **OKF-shaped** local reader, badges, screenshots,
+  acknowledgements.
+- `docs/ARCHITECTURE.md` and `docs/DISTRIBUTION.md` added; `glama.json` for
+  the Glama MCP directory.
+- CI: the vitest step is skipped on Node 18 (vitest 4 needs Node 20+); the
+  package itself still supports Node ≥ 18.
+
+## 1.1.0 — 2026-04-08
 
 The MCP-first release. Adds semantic search, hybrid search, LLM enrichment,
 provider abstraction for any LLM/embeddings backend, and an optional document

@@ -7,8 +7,10 @@
 [![CI](https://github.com/GuideThomas/obsidian-intelligence/actions/workflows/ci.yml/badge.svg)](https://github.com/GuideThomas/obsidian-intelligence/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](#requirements)
-[![Tests](https://img.shields.io/badge/tests-255%20passing-brightgreen)](#tests)
+[![Tests](https://img.shields.io/badge/tests-264%20passing-brightgreen)](#tests)
 [![MCP](https://img.shields.io/badge/MCP-compatible-blue)](https://modelcontextprotocol.io)
+
+**Last updated:** October 2026 · v1.2.0
 
 Your Obsidian vault is your most valuable knowledge base. But no AI assistant can read it — not without uploading your notes to some cloud service.
 
@@ -56,7 +58,7 @@ Each of these works without writing any code — once MCP is connected, your vau
 
 ## What you get
 
-### 13 MCP tools, ready to use
+### 14 MCP tools, ready to use
 
 | Tool | What it does |
 |---|---|
@@ -71,6 +73,7 @@ Each of these works without writing any code — once MCP is connected, your vau
 | `engagement_stats` | Activity distribution + revival candidates |
 | `list_catalysts` | Open AI-generated reflection questions |
 | `search_content` | **FTS5 full-text search** with BM25 ranking, snippets |
+| `find_similar` | Notes most similar in meaning to a given note |
 | `semantic_search` | **Vector similarity** — finds meaning, not just words |
 | `hybrid_search` | **RRF-fused keyword + semantic** — usually the best default |
 
@@ -285,7 +288,7 @@ Run `vault-intelligence --help` for the full list.
 | | Smart Connections | RAG-as-a-Service | Custom Python script | **Obsidian Intelligence** |
 |---|---|---|---|---|
 | Lives where? | Inside Obsidian (plugin) | Cloud | Your machine | Your machine |
-| MCP-native? | No | No | No (you'd build it) | **Yes (13 tools)** |
+| MCP-native? | No | No | No (you'd build it) | **Yes (14 tools)** |
 | Multi-client? | Obsidian only | Vendor-locked | One-off | **Any MCP client** |
 | Local-by-default? | Partial | No | Yes | **Yes** |
 | Graph + FTS + Semantic + Hybrid? | Semantic only | Varies | Build it yourself | **All four** |
@@ -341,4 +344,4 @@ respective owners.
 
 *Built by [Thomas Winkler](https://thomaswinkler.art). Originally a personal tool for a 6,000-note vault — now hopefully useful to you too.*
 
-*Part of the [inntal-ki](https://github.com/inntal-ki) open-source family — local, private AI tooling for small and medium businesses. See [inntal-ki.com](https://inntal-ki.com).*
+*Part of the [inntal-ki](https://github.com/inntal-ki) open-source family — local, private AI tooling, a personal non-commercial project. See [inntal-ki.eu](https://inntal-ki.eu).*
