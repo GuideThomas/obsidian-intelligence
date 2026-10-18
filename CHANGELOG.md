@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- `package.json`: `bin` path without the leading `./`. npm 11 warned about it
+  on publish and normalised it; the published 1.2.0 installs the
+  `vault-intelligence` command correctly.
+
 ## 1.2.0 — 2026-10-18
 
 A maintenance and hardening release. No new MCP tools, no schema changes —

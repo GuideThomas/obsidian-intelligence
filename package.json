@@ -4,7 +4,7 @@
   "description": "Make your Obsidian vault a first-class knowledge source for any MCP-enabled AI assistant. Local, private, headless. Graph analysis + FTS5 + semantic search + hybrid RRF + LLM enrichment.",
   "main": "vault-intelligence.js",
   "bin": {
-    "vault-intelligence": "./vault-intelligence.js"
+    "vault-intelligence": "vault-intelligence.js"
   },
   "scripts": {
     "start": "node vault-intelligence.js",
