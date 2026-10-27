@@ -29,7 +29,7 @@ to contribute or just understand what happens when you run `index`, start here.
                                   │
                        ┌──────────▼──────────┐
                        │ lib/adapters/       │
-                       │ ├── sources/        │  filesystem | couchdb
+                       │ ├── *.js (sources)  │  filesystem | couchdb
                        │ ├── llm/            │  openai | ollama | none
                        │ └── embeddings/     │  openai | gemini | ollama | none
                        └──────────┬──────────┘
@@ -42,14 +42,14 @@ to contribute or just understand what happens when you run `index`, start here.
 
 ## Layers
 
-### 1. Source adapters (`lib/adapters/sources/`)
+### 1. Source adapters (`lib/adapters/`)
 Abstract the vault location. Two implementations:
 - **`filesystem.js`** — reads `.md` files directly from disk
 - **`couchdb.js`** — reads from an Obsidian LiveSync CouchDB
 
 Both expose the same interface: `iterateNotes()`, `watchNotes()`. Adding a
 third source means adding a file here and registering it in
-`adapters/sources/index.js` — no other code changes.
+`lib/adapters/index.js` — no other code changes.
 
 ### 2. Storage (`lib/database.js`)
 Single SQLite file (`vault-intelligence.db`), schema managed lazily:
@@ -124,7 +124,7 @@ Dark theme, health score, all graph and engagement metrics in one document.
 
 | You want to… | Start in |
 |---|---|
-| Add a new source (Notion, Logseq, etc.) | `lib/adapters/sources/` |
+| Add a new source (Notion, Logseq, etc.) | `lib/adapters/` |
 | Add a new LLM/embeddings provider | `lib/adapters/llm/` or `lib/adapters/embeddings/` |
 | Add a new MCP tool | `mcp-server.mjs` + the corresponding `lib/` module |
 | Change the search ranking | `lib/search.js` |
