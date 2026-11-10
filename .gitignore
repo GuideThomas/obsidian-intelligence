@@ -11,3 +11,7 @@ vault-report.html
 .DS_Store
 Thumbs.db
 report-demo.html
+
+# Claude Code: lokale Rechte und Schlüssel (settings.local.json) nie veröffentlichen
+.claude/settings.local.json
+.claude/settings.local.json.bak-*
