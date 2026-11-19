@@ -343,5 +343,3 @@ respective owners.
 ---
 
 *Built by [Thomas Winkler](https://thomaswinkler.art). Originally a personal tool for a 6,000-note vault — now hopefully useful to you too.*
-
-*Part of the [inntal-ki](https://github.com/inntal-ki) open-source family — local, private AI tooling, a personal non-commercial project. See [inntal-ki.eu](https://inntal-ki.eu).*
