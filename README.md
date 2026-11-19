@@ -10,7 +10,7 @@
 [![Tests](https://img.shields.io/badge/tests-264%20passing-brightgreen)](#tests)
 [![MCP](https://img.shields.io/badge/MCP-compatible-blue)](https://modelcontextprotocol.io)
 
-**Last updated:** October 2026 · v1.2.0
+**Last updated:** November 2026 · v1.2.1
 
 Your Obsidian vault is your most valuable knowledge base. But no AI assistant can read it — not without uploading your notes to some cloud service.
 

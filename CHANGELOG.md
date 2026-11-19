@@ -1,10 +1,14 @@
 # Changelog
 
-## Unreleased
+## 1.2.1 — 2026-11-19
 
+Documentation and packaging only, no code changes.
+
+- README: the footer no longer refers to a project family.
 - `package.json`: `bin` path without the leading `./`. npm 11 warned about it
   on publish and normalised it; the published 1.2.0 installs the
   `vault-intelligence` command correctly.
+- `ARCHITECTURE.md`: source adapters live in `lib/adapters/`.
 
 ## 1.2.0 — 2026-10-18
 
